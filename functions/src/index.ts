@@ -20,6 +20,7 @@
 
 import * as functions from 'firebase-functions'; //you can choose between v1 and v2, which version supports your needs
 import * as admin from 'firebase-admin';
+import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
 
 type Indexable = { [key: string]: any };
 
@@ -32,24 +33,79 @@ export const helloWorld = functions.https.onRequest((request, response) => {
     response.send(`<h1>${message}</h1>`);
 });
 
-export const monitorAppointments = functions.firestore.document("appointments/{appointmentId}").onWrite((change,context) => {
+export const monitorAppointments = functions.firestore.document("appointments/{appointmentId}").onWrite(async (change, context) => {
     const newValue = change.after.data();
     const oldValue = change.before.data();
 
     console.log("appointment updated", context.params.appointmentId);
     console.log(newValue);
     console.log(oldValue);
-    return null;
+
+    const message : TokenMessage = {
+        notification: {
+            title: `Appointment with ${newValue?.doctorName} at ${newValue?.date} was updated`,
+            body: `The appointment details or status might have changed. Please check the appointment for more information.`,
+        },
+        android: {
+            priority: 'high',
+        },
+        token: ''
+    };
+
+    const userFields = [newValue?.patientUid, newValue?.doctorUid];
+    const response = await admin.firestore().collection('deviceTokens').where('userUid', 'in', userFields)
+        .get()
+        .then(async (snapshot) => {
+            const tokens = await snapshot.docs.map(doc => doc.data().token);
+            return tokens;
+        })
+        .then(async tokens => {
+            for (const token of tokens) {
+                try {
+                    message.token = token;
+                    console.log(token)
+                    const response = await admin.messaging().send(message);
+                    console.log(`success ${response}`)
+                } catch (error) {
+                    console.error(`Error here: ${error}`);
+                }
+            }
+        });
+    return response;
 });
 
 //todo
 
-//> npm run build && firebase emulators:start --only firestore
+// send notifications
 
-
-//> build
-//> tsc
-
-//i  emulators: Shutting down emulators.
-
-//Error: Could not spawn `java -version`. Please make sure Java is installed and on your system PATH.
+// >  appointment updated yxElwh5RLHrIeW37ubvq
+// >  {
+// >    patientUid: 'f90dsf7d9s0',
+// >    doctorUid: 'fdfs9fd',
+// >    date: Timestamp { _seconds: 1713367783, _nanoseconds: 237000000 },
+// >    accepted: false
+// >  }
+// >  {
+// >    patientUid: 'f90dsf7d9s0',
+// >    doctorUid: 'fdfs9fd',
+// >    date: Timestamp { _seconds: 1713367783, _nanoseconds: 237000000 },
+// >    accepted: true
+// >  }
+// >  success [object Promise]
+// i  functions: Finished "us-central1-monitorAppointments" in 622.3312ms
+// >  D:\medihealth-node\functions\node_modules\firebase-admin\lib\utils\error.js:254
+// >          return new FirebaseMessagingError(error);
+// >                 ^
+// >
+// >  FirebaseMessagingError: Requested entity was not found.
+// >      at FirebaseMessagingError.fromServerError (D:\medihealth-node\functions\node_modules\firebase-admin\lib\utils\error.js:254:16)
+// >      at createFirebaseError (D:\medihealth-node\functions\node_modules\firebase-admin\lib\messaging\messaging-errors-internal.js:35:47)
+// >      at D:\medihealth-node\functions\node_modules\firebase-admin\lib\messaging\messaging-api-request-internal.js:79:75
+// >      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+// >    errorInfo: {
+// >      code: 'messaging/registration-token-not-registered',
+// >      message: 'Requested entity was not found.'
+// >    },
+// >    codePrefix: 'messaging'
+// >  }
+// >
