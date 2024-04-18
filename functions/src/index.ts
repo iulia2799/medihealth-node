@@ -20,18 +20,18 @@
 
 import * as functions from 'firebase-functions'; //you can choose between v1 and v2, which version supports your needs
 import * as admin from 'firebase-admin';
-import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
+import { onChangeAppointments } from './functions';
 
-type Indexable = { [key: string]: any };
+//type Indexable = { [key: string]: any };
 
 admin.initializeApp();
 
-export const helloWorld = functions.https.onRequest((request, response) => {
-    const name = request.params[0].replace('/', '');
-    const items: Indexable = { lamp: 'This is a lamp', chair: 'Nice chair' };
-    const message = items[name];
-    response.send(`<h1>${message}</h1>`);
-});
+// export const helloWorld = functions.https.onRequest((request, response) => {
+//     const name = request.params[0].replace('/', '');
+//     const items: Indexable = { lamp: 'This is a lamp', chair: 'Nice chair' };
+//     const message = items[name];
+//     response.send(`<h1>${message}</h1>`);
+// });
 
 export const monitorAppointments = functions.firestore.document("appointments/{appointmentId}").onWrite(async (change, context) => {
     const newValue = change.after.data();
@@ -41,16 +41,8 @@ export const monitorAppointments = functions.firestore.document("appointments/{a
     console.log(newValue);
     console.log(oldValue);
 
-    const message : TokenMessage = {
-        notification: {
-            title: `Appointment with ${newValue?.doctorName} at ${newValue?.date} was updated`,
-            body: `The appointment details or status might have changed. Please check the appointment for more information.`,
-        },
-        android: {
-            priority: 'high',
-        },
-        token: ''
-    };
+    const message = onChangeAppointments(newValue,oldValue);
+    console.log(newValue?.date)
 
     const userFields = [newValue?.patientUid, newValue?.doctorUid];
     const response = await admin.firestore().collection('deviceTokens').where('userUid', 'in', userFields)
