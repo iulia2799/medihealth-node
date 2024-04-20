@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   env: {
-    es6: true,
+    es6: false,
     node: true,
   },
   extends: [
@@ -20,13 +20,10 @@ module.exports = {
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
   ],
-  plugins: [
-    "@typescript-eslint",
-    "import",
-  ],
+  plugins: ["@typescript-eslint", "import"],
   rules: {
-    "quotes": ["error", "double"],
+    quotes: ["error", "single"],
     "import/no-unresolved": 0,
-    "indent": ["error", 2],
+    indent: ["error", 3],
   },
 };

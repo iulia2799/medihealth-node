@@ -18,9 +18,9 @@
 //   response.send("Hello from Firebase!");
 // });
 
-import * as functions from 'firebase-functions'; //you can choose between v1 and v2, which version supports your needs
-import * as admin from 'firebase-admin';
-import { onChangeAppointments } from './functions';
+import * as functions from "firebase-functions"; //you can choose between v1 and v2, which version supports your needs
+import * as admin from "firebase-admin";
+import { onChangeAppointments } from "./functions";
 
 //type Indexable = { [key: string]: any };
 
@@ -33,40 +33,71 @@ admin.initializeApp();
 //     response.send(`<h1>${message}</h1>`);
 // });
 
-export const monitorAppointments = functions.firestore.document("appointments/{appointmentId}").onWrite(async (change, context) => {
+export const monitorAppointments = functions.firestore
+  .document('appointments/{appointmentId}')
+  .onWrite(async (change, context) => {
     const newValue = change.after.data();
     const oldValue = change.before.data();
 
-    console.log("appointment updated", context.params.appointmentId);
+    console.log('appointment updated', context.params.appointmentId);
     console.log(newValue);
     console.log(oldValue);
 
-    const message = onChangeAppointments(newValue,oldValue);
-    console.log(newValue?.date)
+    const message = onChangeAppointments(newValue, oldValue);
+    console.log(newValue?.date);
 
     const userFields = [newValue?.patientUid, newValue?.doctorUid];
-    const response = await admin.firestore().collection('deviceTokens').where('userUid', 'in', userFields)
-        .get()
-        .then(async (snapshot) => {
-            const tokens = await snapshot.docs.map(doc => doc.data().token);
-            return tokens;
-        })
-        .then(async tokens => {
-            for (const token of tokens) {
-                try {
-                    message.token = token;
-                    console.log(token)
-                    const response = await admin.messaging().send(message);
-                    console.log(`success ${response}`)
-                } catch (error) {
-                    console.error(`Error here: ${error}`);
-                }
-            }
-        });
+    const response = await admin
+      .firestore()
+      .collection('deviceTokens')
+      .where('userUid', 'in', userFields)
+      .get()
+      .then(async (snapshot) => {
+        const tokens = await snapshot.docs.map((doc) => doc.data().token);
+        return tokens;
+      })
+      .then(async (tokens) => {
+        for (const token of tokens) {
+          try {
+            message.token = token;
+            console.log(token);
+            const response = await admin.messaging().send(message);
+            console.log(`success ${response}`);
+          } catch (error) {
+            console.error(`Error here: ${error}`);
+          }
+        }
+      });
     return response;
-});
+  });
 
-//todo
+// export const scheduler = functions.pubsub.schedule('* * * * *').onRun(async () => {
+//     const firestore = admin.firestore();
+//     const medicationRefs = firestore.collection('medication');
+//     const snapshot = await medicationRefs.get();
+//     const medicationList = snapshot.docs;
+//     const currentTime = Date.now();
+//     console.log(currentTime)
+
+//     for(const item of medicationList) {
+//         const data = item.data();
+//         const name = data.medicationName;
+//         const alarms = data.alarms;
+//         for(let alarm of alarms) {
+//             if(alarm >= currentTime) {
+//                 console.log(`send notification ${name}`);
+//             }
+//         }
+//     }
+//     return snapshot;
+// });
+
+export const scheduler = functions.pubsub.schedule('* * * * *').onRun(async () => {
+    console.log('i am here');
+    return null;
+})
+
+// todo
 
 // send notifications
 

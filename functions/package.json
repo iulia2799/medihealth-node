@@ -1,12 +1,13 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "eslint --ext .js,.ts .",
+    "lint": "eslint --ext .js,.ts",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "dev": "npm run build && firebase emulators:start --inspect-functions --only functions",
     "serve": "npm run build && firebase emulators:start --only functions",
     "servefirestore": "npm run build && firebase emulators:start",
+    "startschedulers": "npm run build && firebase emulators:start --only pubsub",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
