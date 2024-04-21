@@ -21,7 +21,7 @@ export function onChangeAppointments(
   } else {
     if (newValue.accepted !== oldValue.accepted && newValue.accepted) {
       if (message.notification) {
-        message.notification.body = `Your appointment with ${
+        message.notification.body = `Your appointment with dr. ${
           newValue.doctorName
         } at ${convertTimestampToDate(newValue.date)} was accepted.`;
       }
@@ -41,7 +41,23 @@ export function onChangeAppointments(
   return message;
 }
 
+
 export function medicationReminder(
   value: DocumentData | undefined,
   token: string | undefined
-) {}
+) {
+  if(!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `It is time to take ${value.medicationName} !`,
+      body: `${value.description} \n ${value.frequency} \n ${value.pills} pills left`,
+    },
+    android: {
+      priority: 'high',
+    },
+    token: token ?? '',
+  };
+  return message;
+}

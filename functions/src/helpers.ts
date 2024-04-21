@@ -6,3 +6,7 @@ export function convertTimestampToDate(timestamp: Timestamp) {
   );
   return date.toString();
 }
+
+export function getDailySeconds(date: number) {
+  return Math.floor((date % (1000 * 60 * 60 * 24)) / 1000);
+}
