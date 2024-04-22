@@ -170,7 +170,7 @@ export const getDocs = functions.firestore
               })
               .finally(() => console.log("job done"));
             const remainingDays = data.days - 1;
-            const remainingpills = data.pills - 1;
+            const remainingpills = data.pills - data.pillsPerPortion;
             const update: HashMap = {
               days: remainingDays,
               pills: remainingpills,
