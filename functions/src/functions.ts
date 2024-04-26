@@ -61,3 +61,23 @@ export function medicationReminder(
   };
   return message;
 }
+
+export function onMedCreated(
+  value: DocumentData | undefined,
+  token: string | undefined
+) {
+  if(!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `Your doctor added a new prescription: ${value.medicationName} !`,
+      body: `${value.description} \n Frequency: ${value.frequency} \n ${value.pills} pills.`,
+    },
+    android: {
+      priority: 'high',
+    },
+    token: token ?? '',
+  };
+  return message;
+}
