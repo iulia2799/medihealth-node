@@ -148,7 +148,8 @@ export const onWritePrescriptions = functionsV2.firestore.onDocumentCreated(
       .then(async (snapshot) => {
         const tokens = await snapshot.docs.map((doc) => doc.data().token);
         return tokens;
-      }).then(async (tokens) => {
+      })
+      .then(async (tokens) => {
         for (const token of tokens) {
           try {
             let message = onMedCreated(data, token);
@@ -162,6 +163,29 @@ export const onWritePrescriptions = functionsV2.firestore.onDocumentCreated(
         }
       })
       .finally(() => console.log("job done med"));
+    return response;
+  }
+);
+
+export const onNewConversation = functionsV2.firestore.onDocumentCreated(
+  "convolist/{conversationId}",
+  async (event) => {
+    const content = event.data;
+    if (!content) {
+      console.log("oops");
+    }
+    const messageRef = `convolist/${event.params.conversationId}`;
+    const doc = admin.firestore().doc(messageRef);
+    const response = await admin
+      .firestore()
+      .collection("convolist")
+      .doc(event.params.conversationId)
+      .update({
+        messageRef: doc,
+      })
+      .then(() => {
+        console.log("success");
+      });
     return response;
   }
 );

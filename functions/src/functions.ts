@@ -72,7 +72,7 @@ export function onMedCreated(
   var message: TokenMessage = {
     notification: {
       title: `Your doctor added a new prescription: ${value.medicationName} !`,
-      body: `${value.description} \n Frequency: ${value.frequency} \n ${value.pills} pills.`,
+      body: `Please set your reminders as soon as possible ! \n ${value.description} \n Frequency: ${value.frequency} \n ${value.pills} pills.`,
     },
     android: {
       priority: 'high',
