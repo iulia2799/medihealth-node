@@ -181,7 +181,7 @@ export const onNewConversation = functionsV2.firestore.onDocumentCreated(
       .collection("convolist")
       .doc(event.params.conversationId)
       .update({
-        messageRef: doc,
+        messagesRef: doc,
       })
       .then(() => {
         console.log("success");
