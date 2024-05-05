@@ -1,194 +1,44 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-//import {onRequest} from "firebase-functions/v2/https";
-//import * as logger from "firebase-functions/logger";
-
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
-import * as functions from "firebase-functions"; //you can choose between v1 and v2, which version supports your needs
-import * as functionsV2 from "firebase-functions/v2";
 import * as admin from "firebase-admin";
-import {
-  medicationReminder,
-  onChangeAppointments,
-  onMedCreated,
-} from "./functions";
-import { getDailySeconds } from "./helpers";
-
-//type Indexable = { [key: string]: any };
+import { medScheduler } from "./functions/schedulers/medication-reminder";
+import { monitorAppointments } from "./functions/triggerfunctions/monitor-app";
+import { onWritePrescriptions } from "./functions/triggerfunctions/monitor-med";
+import { onNewConversation } from "./functions/triggerfunctions/monitor-convo";
+import { appointmentReminder } from "./functions/schedulers/appointment-reminder";
 
 admin.initializeApp();
 
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//     const name = request.params[0].replace('/', '');
-//     const items: Indexable = { lamp: 'This is a lamp', chair: 'Nice chair' };
-//     const message = items[name];
-//     response.send(`<h1>${message}</h1>`);
+export { medScheduler };
+export { monitorAppointments };
+export { onWritePrescriptions };
+export { onNewConversation };
+export { appointmentReminder };
+
+//test functions
+
+// export const search = functions.https.onRequest((data, response) => {
+//   // Get a reference to your Firestore collection
+//   const collectionRef = admin.firestore().collection("adresses");
+
+//   // Create a query to search for documents where the "address" field contains the searchTerm (case-insensitive)
+//   const query = collectionRef.where("address", "array-contains", "resita");
+
+//   return query
+//     .get()
+//     .then((querySnapshot) => {
+//       // Loop through the documents in the query snapshot
+//       let matchingDocs: any[] = [];
+//       querySnapshot.forEach((doc) => {
+//         console.log(doc.data());
+//         matchingDocs.push(doc.data());
+//       });
+//       response.send(matchingDocs);
+//       return matchingDocs;
+//     })
+//     .catch((error) => {
+//       console.log("Error searching Firestore:", error);
+//       return error;
+//     });
 // });
-
-export const monitorAppointments = functions.firestore
-  .document("appointments/{appointmentId}")
-  .onWrite(async (change, context) => {
-    const newValue = change.after.data();
-    const oldValue = change.before.data();
-
-    const message = onChangeAppointments(newValue, oldValue);
-
-    const userFields = [newValue?.patientUid, newValue?.doctorUid];
-    const response = await admin
-      .firestore()
-      .collection("deviceTokens")
-      .where("userUid", "in", userFields)
-      .get()
-      .then(async (snapshot) => {
-        const tokens = await snapshot.docs.map((doc) => doc.data().token);
-        return tokens;
-      })
-      .then(async (tokens) => {
-        for (const token of tokens) {
-          try {
-            message.token = token;
-            console.log(token);
-            const response = await admin.messaging().send(message);
-            console.log(`success ${response}`);
-          } catch (error) {
-            console.error(`Error here: ${error}`);
-          }
-        }
-      });
-    return response;
-  });
-
-export const scheduler = functions.pubsub
-  .schedule("* * * * *")
-  .onRun(async () => {
-    const firestore = admin.firestore();
-    const medicationRefs = firestore.collection("medication");
-    const snapshot = await medicationRefs.get().then(async (medicationList) => {
-      for (const item of medicationList.docs) {
-        const data = item.data();
-        const id = item.id;
-        const alarms = data.alarms;
-
-        const currentTime = getDailySeconds(Date.now());
-        console.log(currentTime);
-
-        for (let alarm of alarms) {
-          if (alarm >= currentTime - 60 && alarm <= currentTime) {
-            const userFields = [data?.patientUid];
-
-            await firestore
-              .collection("deviceTokens")
-              .where("userUid", "in", userFields)
-              .get()
-              .then(async (snapshot) => {
-                const tokens = await snapshot.docs.map(
-                  (doc) => doc.data().token
-                );
-                return tokens;
-              })
-              .then(async (tokens) => {
-                for (const token of tokens) {
-                  try {
-                    let message = medicationReminder(data, token);
-                    if (message) {
-                      const response = await admin.messaging().send(message);
-                      console.log(`success ${response}`);
-                    }
-                  } catch (error) {
-                    console.error(`Error here: ${error}`);
-                  }
-                }
-              })
-              .finally(() => console.log("job done"));
-            const remainingDays = data.days - 1;
-            const remainingpills = data.pills - data.pillsPerPortion;
-            const update: HashMap = {
-              days: remainingDays,
-              pills: remainingpills,
-            };
-            await firestore
-              .doc(`medication/${id}`)
-              .update(update)
-              .then(() => console.log("ok"));
-          }
-        }
-      }
-    });
-
-    return snapshot;
-  });
-
-export const onWritePrescriptions = functionsV2.firestore.onDocumentCreated(
-  "medication/{medicationId}",
-  async (event) => {
-    const content = event.data;
-    if (!content) {
-      console.log("oops");
-    }
-    const data = content?.data();
-    const response = await admin
-      .firestore()
-      .collection("deviceTokens")
-      .where("userUid", "==", data?.patientUid)
-      .get()
-      .then(async (snapshot) => {
-        const tokens = await snapshot.docs.map((doc) => doc.data().token);
-        return tokens;
-      })
-      .then(async (tokens) => {
-        for (const token of tokens) {
-          try {
-            let message = onMedCreated(data, token);
-            if (message) {
-              const response = await admin.messaging().send(message);
-              console.log(`success ${response}`);
-            }
-          } catch (error) {
-            console.error(`Error here: ${error}`);
-          }
-        }
-      })
-      .finally(() => console.log("job done med"));
-    return response;
-  }
-);
-
-export const onNewConversation = functionsV2.firestore.onDocumentCreated(
-  "convolist/{conversationId}",
-  async (event) => {
-    const content = event.data;
-    if (!content) {
-      console.log("oops");
-    }
-    const messageRef = `convolist/${event.params.conversationId}`;
-    const doc = admin.firestore().doc(messageRef);
-    const response = await admin
-      .firestore()
-      .collection("convolist")
-      .doc(event.params.conversationId)
-      .update({
-        messagesRef: doc,
-      })
-      .then(() => {
-        console.log("success");
-      });
-    return response;
-  }
-);
 
 // export const getDocs = functions.firestore
 //   .document("appointments/{appointmentId}")

@@ -8,7 +8,9 @@ export function onChangeAppointments(
 ) {
   var message: TokenMessage = {
     notification: {
-      title: `Appointment with ${newValue?.doctorName} at ${convertTimestampToDate(newValue?.date)} was updated`,
+      title: `Appointment with ${
+        newValue?.doctorName
+      } at ${convertTimestampToDate(newValue?.date)} was updated`,
       body: `The appointment details or status might have changed. Please check the appointment for more information.`,
     },
     android: {
@@ -41,12 +43,11 @@ export function onChangeAppointments(
   return message;
 }
 
-
 export function medicationReminder(
   value: DocumentData | undefined,
   token: string | undefined
 ) {
-  if(!value) {
+  if (!value) {
     return null;
   }
   var message: TokenMessage = {
@@ -55,9 +56,9 @@ export function medicationReminder(
       body: `${value.description} \n ${value.frequency} \n ${value.pills} pills left`,
     },
     android: {
-      priority: 'high',
+      priority: "high",
     },
-    token: token ?? '',
+    token: token ?? "",
   };
   return message;
 }
@@ -66,7 +67,7 @@ export function onMedCreated(
   value: DocumentData | undefined,
   token: string | undefined
 ) {
-  if(!value) {
+  if (!value) {
     return null;
   }
   var message: TokenMessage = {
@@ -75,9 +76,31 @@ export function onMedCreated(
       body: `Please set your reminders as soon as possible ! \n ${value.description} \n Frequency: ${value.frequency} \n ${value.pills} pills.`,
     },
     android: {
-      priority: 'high',
+      priority: "high",
     },
-    token: token ?? '',
+    token: token ?? "",
+  };
+  return message;
+}
+
+export function remindAppointment(
+  value: DocumentData | undefined,
+  token: string | undefined
+) {
+  if (!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `Appointment reminder`,
+      body: `Appointment with ${value?.doctorName} at ${convertTimestampToDate(
+        value?.date
+      )} will be in the next 30 minutes.`,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
   };
   return message;
 }
