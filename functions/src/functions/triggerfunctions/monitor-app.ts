@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions"; //you can choose between v1 and v2, which version supports your needs
 import * as admin from "firebase-admin";
 import { onChangeAppointments } from "../../utils";
+import { TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
 
 export const monitorAppointments = functions.firestore
   .document("appointments/{appointmentId}")
@@ -8,8 +9,9 @@ export const monitorAppointments = functions.firestore
     const newValue = change.after.data();
     const oldValue = change.before.data();
 
-    const message = onChangeAppointments(newValue, oldValue);
-
+    var message: TokenMessage = {
+      token: ""
+    }
     const userFields = [newValue?.patientUid, newValue?.doctorUid];
     const response = await admin
       .firestore()
@@ -17,13 +19,18 @@ export const monitorAppointments = functions.firestore
       .where("userUid", "in", userFields)
       .get()
       .then(async (snapshot) => {
-        const tokens = await snapshot.docs.map((doc) => doc.data().token);
-        return tokens;
+        //const tokens = await snapshot.docs.map((doc) => doc.data().token);
+        return snapshot.docs;
       })
       .then(async (tokens) => {
         for (const token of tokens) {
           try {
-            message.token = token;
+            if(token.data().userUid === newValue?.patientUid){
+              message = onChangeAppointments(newValue,oldValue,false);
+            } else {
+              message = onChangeAppointments(newValue,oldValue,true);
+            }
+            message.token = token.data().token;
             console.log(token);
             const response = await admin.messaging().send(message);
             console.log(`success ${response}`);

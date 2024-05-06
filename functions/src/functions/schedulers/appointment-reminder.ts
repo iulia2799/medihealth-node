@@ -5,7 +5,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { remindAppointment } from "../../utils";
 import {logger} from "firebase-functions";
 
-export const appointmentReminder = onSchedule("* * * * *", async () => {
+export const appointmentReminder = onSchedule("*/15 * * * *", async () => {
   const firestore = admin.firestore();
   console.log("please")
   const appointments = firestore.collection("appointments");

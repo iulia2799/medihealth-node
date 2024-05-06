@@ -4,13 +4,13 @@ import { convertTimestampToDate } from "./helpers";
 
 export function onChangeAppointments(
   newValue: DocumentData | undefined,
-  oldValue: DocumentData | undefined
+  oldValue: DocumentData | undefined,
+  isDoc: boolean
 ) {
+  const person = isDoc ? `dr. ${newValue?.doctorName}` : newValue?.patientName;
   var message: TokenMessage = {
     notification: {
-      title: `Appointment with ${
-        newValue?.doctorName
-      } at ${convertTimestampToDate(newValue?.date)} was updated`,
+      title: `Appointment with ${person} was updated`,
       body: `The appointment details or status might have changed. Please check the appointment for more information.`,
     },
     android: {
@@ -23,18 +23,16 @@ export function onChangeAppointments(
   } else {
     if (newValue.accepted !== oldValue.accepted && newValue.accepted) {
       if (message.notification) {
-        message.notification.body = `Your appointment with dr. ${
-          newValue.doctorName
-        } at ${convertTimestampToDate(newValue.date)} was accepted.`;
+        message.notification.body = `Your appointment with dr. ${person} at ${convertTimestampToDate(
+          newValue.date
+        )} was accepted.`;
       }
     } else if (
       convertTimestampToDate(newValue.date) !==
       convertTimestampToDate(oldValue.date)
     ) {
       if (message.notification) {
-        message.notification.body = `Your appointment with ${
-          newValue.doctorName
-        } at ${convertTimestampToDate(
+        message.notification.body = `Your appointment with ${person} at ${convertTimestampToDate(
           oldValue.date
         )} was rescheduled at ${convertTimestampToDate(newValue.date)}.`;
       }
