@@ -7,11 +7,12 @@ export function onChangeAppointments(
   oldValue: DocumentData | undefined,
   isDoc: boolean
 ) {
-  const person = isDoc ? `dr. ${newValue?.doctorName}` : newValue?.patientName;
+  const person = !isDoc ? `dr. ${newValue?.doctorName}` : newValue?.patientName;
+  const action = oldValue ? 'updated' : 'created';
   var message: TokenMessage = {
     notification: {
-      title: `Appointment with ${person} was updated`,
-      body: `The appointment details or status might have changed. Please check the appointment for more information.`,
+      title: `Appointment with ${person} was ${action}`,
+      body: `Please check the appointment for more information.`,
     },
     android: {
       priority: "high",
