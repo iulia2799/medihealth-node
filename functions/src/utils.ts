@@ -8,7 +8,7 @@ export function onChangeAppointments(
   isDoc: boolean
 ) {
   const person = !isDoc ? `dr. ${newValue?.doctorName}` : newValue?.patientName;
-  const action = oldValue ? 'updated' : 'created';
+  const action = oldValue ? "updated" : "created";
   var message: TokenMessage = {
     notification: {
       title: `Appointment with ${person} was ${action}`,
@@ -95,6 +95,26 @@ export function remindAppointment(
       body: `Appointment with ${value?.doctorName} at ${convertTimestampToDate(
         value?.date
       )} will be in the next 30 minutes.`,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
+  };
+  return message;
+}
+
+export function resultNotification(
+  value: DocumentData | undefined,
+  token: string | undefined
+) {
+  if (!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `Results ready`,
+      body: `Your results from dr. ${value.doctorName} are ready. Please open the application.`,
     },
     android: {
       priority: "high",
