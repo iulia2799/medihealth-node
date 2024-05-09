@@ -24,14 +24,11 @@ export function onChangeAppointments(
   } else {
     if (newValue.accepted !== oldValue.accepted && newValue.accepted) {
       if (message.notification) {
-        message.notification.body = `Your appointment with dr. ${person} at ${convertTimestampToDate(
+        message.notification.body = `Your appointment with ${person} at ${convertTimestampToDate(
           newValue.date
         )} was accepted.`;
       }
-    } else if (
-      convertTimestampToDate(newValue.date) !==
-      convertTimestampToDate(oldValue.date)
-    ) {
+    } else if (newValue.date !== oldValue.date) {
       if (message.notification) {
         message.notification.body = `Your appointment with ${person} at ${convertTimestampToDate(
           oldValue.date

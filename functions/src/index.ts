@@ -4,6 +4,7 @@ import { monitorAppointments } from "./functions/triggerfunctions/monitor-app";
 import { onWritePrescriptions } from "./functions/triggerfunctions/monitor-med";
 import { onNewConversation } from "./functions/triggerfunctions/monitor-convo";
 import { appointmentReminder } from "./functions/schedulers/appointment-reminder";
+import { onResults } from "./functions/triggerfunctions/trigger-results";
 
 admin.initializeApp();
 
@@ -12,7 +13,7 @@ export { monitorAppointments };
 export { onWritePrescriptions };
 export { onNewConversation };
 export { appointmentReminder };
-
+export { onResults };
 
 //test functions
 

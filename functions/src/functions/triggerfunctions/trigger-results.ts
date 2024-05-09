@@ -6,7 +6,7 @@ export const onResults = functionsV2.firestore.onDocumentCreated(
   "resultrecords/{id}",
   async (event) => {
     const content = event.data;
-    const UID = content?.data().patientUid;
+    const UID = content?.data().patientRef;
     const response = await admin
       .firestore()
       .collection("deviceTokens")
