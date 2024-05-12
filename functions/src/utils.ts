@@ -120,3 +120,46 @@ export function resultNotification(
   };
   return message;
 }
+
+export function onMedUpdate(
+  value: DocumentData | undefined,
+  token: string | undefined,
+  isDoc: boolean = false
+) {
+  if (!value) {
+    return null;
+  }
+  const body = !isDoc
+    ? `Your prescription of ${value.medicationName} has ran out.`
+    : `${value.medicationName} for patient ${value.patientName} has ran out. \n Please update or delete it.`;
+  var message: TokenMessage = {
+    notification: {
+      title: `Prescription removed`,
+      body: body,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
+  };
+  return message;
+}
+export function onMedDeleted(
+  value: DocumentData | undefined,
+  token: string | undefined
+) {
+  if (!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `Prescription removed`,
+      body: `Your prescription of ${value.medicationName} was removed.`,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
+  };
+  return message;
+}

@@ -1,7 +1,11 @@
 import * as admin from "firebase-admin";
 import { medScheduler } from "./functions/schedulers/medication-reminder";
 import { monitorAppointments } from "./functions/triggerfunctions/monitor-app";
-import { onWritePrescriptions } from "./functions/triggerfunctions/monitor-med";
+import {
+  onDeletedPrescriptions,
+  onEmptyPrescriptions,
+  onWritePrescriptions,
+} from "./functions/triggerfunctions/monitor-med";
 import { onNewConversation } from "./functions/triggerfunctions/monitor-convo";
 import { appointmentReminder } from "./functions/schedulers/appointment-reminder";
 import { onResults } from "./functions/triggerfunctions/trigger-results";
@@ -14,6 +18,8 @@ export { onWritePrescriptions };
 export { onNewConversation };
 export { appointmentReminder };
 export { onResults };
+export { onEmptyPrescriptions };
+export { onDeletedPrescriptions };
 
 //test functions
 
