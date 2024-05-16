@@ -9,6 +9,7 @@ import {
 import { onNewConversation } from "./functions/triggerfunctions/monitor-convo";
 import { appointmentReminder } from "./functions/schedulers/appointment-reminder";
 import { onResults } from "./functions/triggerfunctions/trigger-results";
+import { cleanTempData } from "./functions/triggerfunctions/temporary-file-maitenance";
 
 admin.initializeApp();
 
@@ -20,6 +21,7 @@ export { appointmentReminder };
 export { onResults };
 export { onEmptyPrescriptions };
 export { onDeletedPrescriptions };
+export { cleanTempData };
 
 //test functions
 
