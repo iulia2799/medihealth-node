@@ -28,7 +28,18 @@ export function onChangeAppointments(
           newValue.date
         )} was accepted.`;
       }
-    } else if (newValue.date !== oldValue.date) {
+    } else if (newValue.missed && newValue.missed !== oldValue.missed) {
+      if (message.notification) {
+        message.notification.title = `You missed an appointment!`;
+        message.notification.body = `You missed your appointment with ${person} at ${convertTimestampToDate(
+          newValue.date
+        )}`;
+      }
+    } else if (
+      newValue.date !== oldValue.date &&
+      convertTimestampToDate(oldValue.date) !==
+        convertTimestampToDate(newValue.date)
+    ) {
       if (message.notification) {
         message.notification.body = `Your appointment with ${person} at ${convertTimestampToDate(
           oldValue.date
