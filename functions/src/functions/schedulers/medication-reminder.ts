@@ -12,12 +12,13 @@ export const medScheduler = functions.pubsub
       for (const item of medicationList.docs) {
         const data = item.data();
         const id = item.id;
-        const alarms = data.alarms;
+        const alarms = data.alarms
 
         const currentTime = getDailySeconds(Date.now());
         console.log(currentTime);
-
+        let index = 0;
         for (let alarm of alarms) {
+          index++;
           if (alarm >= currentTime - 60 && alarm <= currentTime) {
             const userFields = [data?.patientUid];
 
@@ -45,7 +46,10 @@ export const medScheduler = functions.pubsub
                 }
               })
               .finally(() => console.log("job done"));
-            const remainingDays = data.days - 1;
+            let remainingDays = data.days;
+            if(index == alarms.length) {
+              remainingDays--;
+            }
             const remainingpills = data.pills - data.pillsPerPortion;
             const update: HashMap = {
               days: remainingDays,
