@@ -174,3 +174,23 @@ export function onMedDeleted(
   };
   return message;
 }
+
+export function billingNotification(
+  value: DocumentData | undefined,
+  token: string | undefined
+) {
+  if (!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `Billing ready`,
+      body: `Your bills from dr. ${value.doctorName} are ready. Please open the application.`,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
+  };
+  return message;
+}
