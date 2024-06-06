@@ -50,15 +50,23 @@ export const medScheduler = functions.pubsub
             if(index == alarms.length) {
               remainingDays--;
             }
-            const remainingpills = data.pills - data.pillsPerPortion;
-            const update: HashMap = {
-              days: remainingDays,
-              pills: remainingpills,
-            };
-            await firestore
+            if(remainingDays === 0) {
+              await firestore
               .doc(`medication/${id}`)
-              .update(update)
+              .delete()
               .then(() => console.log("ok"));
+            } else {
+              const remainingpills = data.pills - data.pillsPerPortion;
+              const update: HashMap = {
+                days: remainingDays,
+                pills: remainingpills,
+              };
+              await firestore
+                .doc(`medication/${id}`)
+                .update(update)
+                .then(() => console.log("ok"));
+            }
+            
           }
         }
       }

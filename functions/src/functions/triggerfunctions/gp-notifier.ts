@@ -11,6 +11,7 @@ export const onNewPatient = functionsV2.firestore.onDocumentUpdated(
         return;
     }
     if(doctor === "" && event.data?.before.data().doctorUid !== "") {
+        console.log("BOOT")
         const response = await admin
         .firestore()
         .collection("deviceTokens")
