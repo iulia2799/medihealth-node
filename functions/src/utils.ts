@@ -194,3 +194,44 @@ export function billingNotification(
   };
   return message;
 }
+
+export function onNewPatientNotification(
+  value: DocumentData | undefined,
+  token: string | undefined
+){
+  if (!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `New patient assigned.`,
+      body: `There is a new patient assigned to you. \n Patient name : ${value.firstName} ${value.lastName}.
+      \n You can remove the patient if you want or ignore the notification`,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
+  };
+  return message;
+}
+
+export function onBootedPatient(
+  value: DocumentData | undefined,
+  token: string | undefined
+){
+  if (!value) {
+    return null;
+  }
+  var message: TokenMessage = {
+    notification: {
+      title: `You were removed from a doctor.`,
+      body: `You were removed from your GP. You can modify your profile to get assigned to a new one`,
+    },
+    android: {
+      priority: "high",
+    },
+    token: token ?? "",
+  };
+  return message;
+}

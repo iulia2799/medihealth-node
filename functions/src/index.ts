@@ -11,6 +11,7 @@ import { appointmentReminder } from "./functions/schedulers/appointment-reminder
 import { onResults } from "./functions/triggerfunctions/trigger-results";
 import { cleanTempData } from "./functions/triggerfunctions/temporary-file-maitenance";
 import { onBillingCreated } from "./functions/triggerfunctions/billing";
+import { onNewPatient } from "./functions/triggerfunctions/gp-notifier";
 
 admin.initializeApp();
 
@@ -23,7 +24,8 @@ export { onResults };
 export { onEmptyPrescriptions };
 export { onDeletedPrescriptions };
 export { cleanTempData };
-export {onBillingCreated};
+export { onBillingCreated };
+export { onNewPatient };
 
 //test functions
 
