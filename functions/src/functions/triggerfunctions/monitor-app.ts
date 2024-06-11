@@ -12,7 +12,7 @@ export const monitorAppointments = functions.firestore
     var message: TokenMessage = {
       token: ""
     }
-    const userFields = [newValue?.patientUid, newValue?.doctorUid];
+    const userFields = [newValue?.patientUid ?? oldValue?.patientUid, newValue?.doctorUid ?? oldValue?.doctorUid];
     const response = await admin
       .firestore()
       .collection("deviceTokens")

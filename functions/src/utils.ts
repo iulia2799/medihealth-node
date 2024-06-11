@@ -8,7 +8,8 @@ export function onChangeAppointments(
   isDoc: boolean
 ) {
   const person = !isDoc ? `dr. ${newValue?.doctorName}` : newValue?.patientName;
-  const action = oldValue ? "updated" : "created";
+  let action = oldValue ? "updated" : "created";
+  if (!newValue) action = "canceled";
   var message: TokenMessage = {
     notification: {
       title: `Appointment with ${person} was ${action}`,
@@ -36,14 +37,18 @@ export function onChangeAppointments(
         )}`;
       }
     } else if (
-      newValue.date !== oldValue.date &&
-      convertTimestampToDate(oldValue.date) !==
-        convertTimestampToDate(newValue.date)
+      newValue.date.seconds !== oldValue.date.seconds
     ) {
       if (message.notification) {
         message.notification.body = `Your appointment with ${person} at ${convertTimestampToDate(
           oldValue.date
         )} was rescheduled at ${convertTimestampToDate(newValue.date)}.`;
+      }
+    } else {
+      if (message.notification) {
+        message.notification.body = `Your appointment with ${person} at ${convertTimestampToDate(
+          oldValue.date
+        )} was updated.`;
       }
     }
   }
@@ -198,7 +203,7 @@ export function billingNotification(
 export function onNewPatientNotification(
   value: DocumentData | undefined,
   token: string | undefined
-){
+) {
   if (!value) {
     return null;
   }
@@ -219,7 +224,7 @@ export function onNewPatientNotification(
 export function onBootedPatient(
   value: DocumentData | undefined,
   token: string | undefined
-){
+) {
   if (!value) {
     return null;
   }
